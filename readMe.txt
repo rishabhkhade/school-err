@@ -50,57 +50,13 @@ sequelize seed:generate --name demo-cancellation_reason
 23. all seeder run
 sequelize db:seed:all
 --For single seeder run
-sequelize-cli db:seed --seed 20210722100209-demo-customer
+sequelize-cli db:seed --seed 20210926065028-demo-user
 
 24. For creating Controller file run command from root of folder
 touch controllers/CountryController.js (on ubuntu)
-type nul > controllers/CountryController.js (on windows)
+touch controllers/PlanController.js (on windows)
 
 25. For access key and refresh key generate:
  node
- require(crypto').randomBytes(64).toString('hex')
+ require('crypto').randomBytes(64).toString('hex')
 
- 26.For ativate PM2 process on server
-    sudo killall node
-    sudo pm2 list
-    sudo pm2 start npm --name "awraaq" -- start
-
-27. Remove ONLY_FULL_GROUP_BY from mysql console
-
-    sudo mysql -u admin -p
-    Password : awraaq@321
-
-    mysql > SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
-
-28. For Cron Job mysql queries to run on server
-
-crontab -e
-
-UPDATE `orders` SET `status`='Cancel' WHERE `order_expiry` < CURRENT_TIME AND `status` != 'Completed';
-UPDATE orders O INNER JOIN offers OF ON O.id = OF.order_id SET OF.status='Cancel' WHERE O.order_expiry < CURRENT_TIME AND OF.status != 'Completed';
-UPDATE orders O INNER JOIN negotiationrooms N ON O.id = N.order_id SET N.status='Cancelled' WHERE O.order_expiry < CURRENT_TIME AND N.status != 'Completed';
-
-#!/bin/bash
-/usr/bin/mysql mysql --user=admin --password=awraaq@321 --execute="UPDATE awraaq.orders SET awraaq.orders.status='Expired' WHERE awraaq.orders.order_expiry < CURRENT_TIME AND awraaq.orders.status != 'Completed' AND awraaq.orders.status != 'Working' AND awraaq.orders.status != 'Cancel';" 
-/usr/bin/mysql mysql --user=admin --password=awraaq@321 --execute="UPDATE awraaq.orders O INNER JOIN awraaq.offers OF ON O.id = OF.order_id SET OF.status='Expired' WHERE O.order_expiry < CURRENT_TIME AND OF.status != 'Completed' AND OF.status != 'Working' AND OF.status != 'Cancel';"
-#/usr/bin/mysql mysql --user=admin --password=awraaq@321 --execute="UPDATE awraaq.orders O INNER JOIN awraaq.negotiationrooms N ON O.id = N.order_id SET N.status='Cancelled' WHERE O.order_expiry < CURRENT_TIME AND N.status != 'Completed';"
-
-#!/bin/bash
-/usr/bin/mysql mysql --user=admin --password=awraaq@321 --execute="UPDATE awraaq.orders SET awraaq.orders.status='Expired' WHERE awraaq.orders.order_expiry < CURRENT_TIME AND awraaq.orders.status != 'Completed' AND awraaq.orders.status != 'Cancel';" 
-/usr/bin/mysql mysql --user=admin --password=awraaq@321 --execute="UPDATE awraaq.orders O INNER JOIN awraaq.offers OF ON O.id = OF.order_id SET OF.status='Expired' WHERE O.order_expiry < CURRENT_TIME AND OF.status != 'Completed' AND OF.status != 'Cancel';"
-/usr/bin/mysql mysql --user=admin --password=awraaq@321 --execute="UPDATE awraaq.orders O INNER JOIN awraaq.negotiationrooms N ON O.id = N.order_id SET N.status='Cancelled' WHERE O.order_expiry < CURRENT_TIME AND N.status != 'Completed';"
-
-
-29. phpmyadmin for server when you will empty html folder, you need to run below command to get phpmyadmin
-sudo ln -s  /usr/share/phpmyadmin /var/www/html/phpmyadmin
-
-30. .env stop to track
-git rm .env --cached
-git commit -m "Stopped tracking .env File" 
-
-
-
-To set IST, run this in MySQL Server
-SET GLOBAL time_zone = '+5:30';
-To check current time in MySQL Server
-SELECT now();

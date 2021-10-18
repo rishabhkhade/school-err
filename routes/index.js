@@ -9,4 +9,8 @@ const routes = Router();
 routes.use('/admin', admin);
 routes.use('/user', userr);
 
+// routes.get('/', async (req, res) => {
+//     res.send('hello');
+// })
+
 export default routes;

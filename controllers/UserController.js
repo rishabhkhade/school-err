@@ -2,6 +2,8 @@ import sCode from "../custom/status-codes";
 const { ok, created, bad_request, server_error } = sCode;
 
 import { User } from '../models';
+import user from "../validation/user";
+
 
 //validation import
 import validateUser from '../validation/user';
@@ -10,38 +12,30 @@ import validateUser from '../validation/user';
 export default {
     async getUsers(req, res) {
         try {
-            const { pageNo } = req.query;
-            const page = (pageNo != null && pageNo != undefined) ? pageNo : 1;
-            const pageSize = pageLimit();
-            let usersRes = [];
-            usersRes = await User.getList(model, pageNo, pageSize);
-            const pages = Math.ceil(usersRes.count / pageSize);
-
-            const pageData = {
-                total_record: usersRes.count,
-                per_page: pageSize,
-                current_page: page,
-                total_pages: pages
-            }
-            const users = usersRes.rows;
-            res.status(ok).send({ users, pageData });
+            const user = await User.findAll({
+                attributes: [
+					'id', 'name', 'email', 'mobile_no',
+					'profile_img', 'is_active'
+				]
+            });
+            return res.status(200).send({ user });
         } catch (e) {
             console.log(e);
-            res.status(server_error).send(e);
+            return res.status(500).send(e);
         }
     },
 
     async addUser(req, res) {
         try {
-            const { error } = validateUser(req.body);
-            if (error) return res.status(bad_request).send({ error: getValidationErrMsg(error) });
-            //check email id is already present
-            const userExist = await User.checkUser(req.body);
-            if (userExist) return res.status(bad_request).send({ error: { email_id: " This email has been already used." } });
+            const saveObj = {
+                ...req.body,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
 
-            const user = await User.saveRecord(req.body);
-            if (!user) return res.status(server_error).send({ message: getServerErrorMsg() });
-            res.status(created).send({ user });
+            const user = await User.create(saveObj);
+
+            return res.status(200).send({ user });
         } catch (e) {
             console.log(e);
             res.status(server_error).send(e);
@@ -50,12 +44,20 @@ export default {
 
     async getUser(req, res) {
         try {
-            const { id } = req.params;
-            const decId = getDecryptId(id);
-            const recordExist = await User.getRecordById(decId);
-            if (!recordExist) return res.status(bad_request).send({ message: getIdNotFoundCommonMsg('user') });
-            const roles = await Role.getDS();
-            res.status(ok).send({ user: recordExist, roles });
+           	// const { Role } = models;
+			return await User.findAll({
+				where: {
+					email: reqData.email
+				},
+				// include: [
+				// 	{ model: Role, as: 'role', attributes: ['role_name', 'description', 'permission'] }
+				// ],
+				attributes: [
+					'id', 'name', 'email', 'mobile_no', 'password',
+					'profile_img', 'role_id', 'status', 'is_active'
+				]
+			});
+            return res.status(200).send({ user });
         } catch (e) {
             console.log(e);
             res.status(server_error).send(e);
@@ -64,22 +66,32 @@ export default {
 
     async updateUser(req, res,) {
         try {
-            const { id } = req.params;
-            const decId = getDecryptId(id);
+            const saveObj = {
+                ...req.body,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
 
-            const { error } = validateUser(req.body, decId);
-            if (error) return res.status(bad_request).send({ error: getValidationErrMsg(error) });
+            const user = await User.create(saveObj);
 
-            let recordExist = await User.getRecordById(decId);
+            return res.status(200).send({ user });
 
-            if (!recordExist) return res.status(bad_request).send({ message: getIdNotFoundCommonMsg('user') });
+            // const { id } = req.params;
+            // const decId = getDecryptId(id);
 
-            const userExist = await User.checkUser(req.body);
-            if (userExist !== null && userExist.id != decId) return res.status(bad_request).send({ error: { email_id: " This email has been already used." } });
+            // // const { error } = validateUser(req.body, decId);
+            // if (error) return res.status(bad_request).send({ error: getValidationErrMsg(error) });
 
-            const user = await User.updateRecord(recordExist, req.body);
-            if (!user) return res.status(server_error).send({ message: getServerErrorMsg() });
-            res.status(created).send({ user });
+            // let recordExist = await User.getRecordById(decId);
+
+            // if (!recordExist) return res.status(bad_request).send({ message: getIdNotFoundCommonMsg('user') });
+
+            // const userExist = await User.checkUser(req.body);
+            // if (userExist !== null && userExist.id != decId) return res.status(bad_request).send({ error: { email_id: " This email has been already used." } });
+
+            // const user = await User.updateRecord(recordExist, req.body);
+            // if (!user) return res.status(server_error).send({ message: getServerErrorMsg() });
+            // res.status(created).send({ user });
         } catch (e) {
             console.log(e);
             res.status(server_error).send(e);
@@ -88,14 +100,21 @@ export default {
 
     async deleteUser(req, res) {
         try {
-            const { id } = req.params;
-            const decId = getDecryptId(id);
-            let recordExist = await User.getRecordById(decId);
-            if (!recordExist) return res.status(bad_request).send({ message: getIdNotFoundCommonMsg('user') });
+            await User.destroy({
+                where:{
 
-            const user = await User.deleteRecord(recordExist);
-            if (!user) return res.status(server_error).send({ message: getServerErrorMsg() });
-            res.status(ok).send({ user });
+                    id : req.params.id
+                },
+                
+            })
+            // const { id } = req.params;
+            // // const decId = getDecryptId(id);
+            // let recordExist = await User.getRecordById(decId);
+            // if (!recordExist) return res.status(bad_request).send({ message: getIdNotFoundCommonMsg('user') });
+
+            // const user = await User.deleteRecord(recordExist);
+            // if (!user) return res.status(server_error).send({ message: getServerErrorMsg() });
+            // res.status(ok).send({ user });
         } catch (e) {
             console.log(e);
             res.status(server_error).send(e);

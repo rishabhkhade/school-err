@@ -39,18 +39,12 @@ export default (sequelize, DataTypes) => {
 	// queries and other function starts
 	Admin.getAdmin = async (reqData, models) => {
 		try {
-			const { Role } = models;
+			// console.log(reqData);
+			// const { Role } = models;
 			return await Admin.findOne({
 				where: {
 					email: reqData.email
-				},
-				include: [
-					{ model: Role, as: 'role', attributes: ['role_name', 'description', 'permission'] }
-				],
-				attributes: [
-					'id', 'name', 'email', 'mobile_no', 'password',
-					 'role_id', 'status', 'is_active'
-				]
+				}
 			});
 		} catch (e) {
 			return false;

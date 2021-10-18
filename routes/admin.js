@@ -3,12 +3,13 @@ import express from "express";
 
 
 const router = Router();
-const admRtr = express.Router();
 
 /* Routes for Login */
 import adminControl from '../controllers/AdminController';
-admRtr.route('/login').post(adminControl.getLogin);
+router.post('/login', adminControl.getLogin);
 
-
+// router.post('/login', async (req, res) => {
+//     res.send('login')
+// })
 
 export default router;
